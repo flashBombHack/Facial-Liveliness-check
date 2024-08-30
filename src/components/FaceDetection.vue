@@ -170,80 +170,87 @@ export default {
       }
     },
     async predictWebcam() {
-      const video = document.getElementById("webcam");
-      const canvasElement = document.getElementById("output_canvas");
-      const canvasCtx = canvasElement.getContext("2d");
-      const drawingUtils = new DrawingUtils(canvasCtx);
+  const video = document.getElementById("webcam");
+  const canvasElement = document.getElementById("output_canvas");
+  const canvasCtx = canvasElement.getContext("2d");
+  const drawingUtils = new DrawingUtils(canvasCtx);
 
-      const videoWidth = 480;
-      const radio = video.videoHeight / video.videoWidth;
-      video.style.width = videoWidth + "px";
-      video.style.height = videoWidth * radio + "px";
-      canvasElement.style.width = videoWidth + "px";
-      canvasElement.style.height = videoWidth * radio + "px";
-      canvasElement.width = video.videoWidth;
-      canvasElement.height = video.videoHeight;
+  const videoWidth = 480;
+  const ratio = video.videoHeight / video.videoWidth;
+  video.style.width = videoWidth + "px";
+  video.style.height = videoWidth * ratio + "px";
+  canvasElement.style.width = videoWidth + "px";
+  canvasElement.style.height = videoWidth * ratio + "px";
+  canvasElement.width = video.videoWidth;
+  canvasElement.height = video.videoHeight;
 
-      if (this.runningMode === "IMAGE") {
-        this.runningMode = "VIDEO";
-        await this.faceLandmarker.setOptions({ runningMode: this.runningMode });
-      }
+  if (this.runningMode === "IMAGE") {
+    this.runningMode = "VIDEO";
+    await this.faceLandmarker.setOptions({ runningMode: this.runningMode });
+  }
 
-      const startTimeMs = performance.now();
-      const results = await this.faceLandmarker.detectForVideo(video, startTimeMs);
+  const startTimeMs = performance.now();
+  const results = await this.faceLandmarker.detectForVideo(video, startTimeMs);
 
-      if (results.faceLandmarks) {
-        for (const landmarks of results.faceLandmarks) {
-          drawingUtils.drawConnectors(
-            landmarks,
-            FaceLandmarker.FACE_LANDMARKS_TESSELATION,
-            { color: "#C0C0C070", lineWidth: 1 }
-          );
-          drawingUtils.drawConnectors(
-            landmarks,
-            FaceLandmarker.FACE_LANDMARKS_RIGHT_EYE,
-            { color: "#FF3030" }
-          );
-          drawingUtils.drawConnectors(
-            landmarks,
-            FaceLandmarker.FACE_LANDMARKS_RIGHT_EYEBROW,
-            { color: "#FF3030" }
-          );
-          drawingUtils.drawConnectors(
-            landmarks,
-            FaceLandmarker.FACE_LANDMARKS_LEFT_EYE,
-            { color: "#30FF30" }
-          );
-          drawingUtils.drawConnectors(
-            landmarks,
-            FaceLandmarker.FACE_LANDMARKS_LEFT_EYEBROW,
-            { color: "#30FF30" }
-          );
-          drawingUtils.drawConnectors(
-            landmarks,
-            FaceLandmarker.FACE_LANDMARKS_FACE_OVAL,
-            { color: "#E0E0E0" }
-          );
-          drawingUtils.drawConnectors(
-            landmarks,
-            FaceLandmarker.FACE_LANDMARKS_LIPS,
-            { color: "#E0E0E0" }
-          );
-          drawingUtils.drawConnectors(
-            landmarks,
-            FaceLandmarker.FACE_LANDMARKS_RIGHT_IRIS,
-            { color: "#FF3030" }
-          );
-          drawingUtils.drawConnectors(
-            landmarks,
-            FaceLandmarker.FACE_LANDMARKS_LEFT_IRIS,
-            { color: "#30FF30" }
-          );
-        }
-      }
+  if (results && results.faceLandmarks) {
+    for (const landmarks of results.faceLandmarks) {
+      drawingUtils.drawConnectors(
+        landmarks,
+        FaceLandmarker.FACE_LANDMARKS_TESSELATION,
+        { color: "#C0C0C070", lineWidth: 1 }
+      );
+      drawingUtils.drawConnectors(
+        landmarks,
+        FaceLandmarker.FACE_LANDMARKS_RIGHT_EYE,
+        { color: "#FF3030" }
+      );
+      drawingUtils.drawConnectors(
+        landmarks,
+        FaceLandmarker.FACE_LANDMARKS_RIGHT_EYEBROW,
+        { color: "#FF3030" }
+      );
+      drawingUtils.drawConnectors(
+        landmarks,
+        FaceLandmarker.FACE_LANDMARKS_LEFT_EYE,
+        { color: "#30FF30" }
+      );
+      drawingUtils.drawConnectors(
+        landmarks,
+        FaceLandmarker.FACE_LANDMARKS_LEFT_EYEBROW,
+        { color: "#30FF30" }
+      );
+      drawingUtils.drawConnectors(
+        landmarks,
+        FaceLandmarker.FACE_LANDMARKS_FACE_OVAL,
+        { color: "#E0E0E0" }
+      );
+      drawingUtils.drawConnectors(
+        landmarks,
+        FaceLandmarker.FACE_LANDMARKS_LIPS,
+        { color: "#E0E0E0" }
+      );
+      drawingUtils.drawConnectors(
+        landmarks,
+        FaceLandmarker.FACE_LANDMARKS_RIGHT_IRIS,
+        { color: "#FF3030" }
+      );
+      drawingUtils.drawConnectors(
+        landmarks,
+        FaceLandmarker.FACE_LANDMARKS_LEFT_IRIS,
+        { color: "#30FF30" }
+      );
+    }
+  } else {
+    console.log("No face landmarks detected.");
+  }
 
-      this.drawBlendShapes(document.getElementById("video-blend-shapes"), results.faceBlendshapes);
-    },
+  if (results && results.faceBlendshapes) {
+    this.drawBlendShapes(document.getElementById("video-blend-shapes"), results.faceBlendshapes);
+  } else {
+    console.log("No face blendshapes detected.");
+  }
+},
+
     drawBlendShapes(element, faceBlendshapes) {
       if (!element) return;
 
